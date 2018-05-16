@@ -22,14 +22,30 @@ test( 'Should render edit expense page correctly', () => {
     expect( wrapper ).toMatchSnapshot();
 } );
 
-test( 'Should handle edit expense', () => {
+test( 'Should change state with values for an edit confirmation modal when clicking on save', () => {
     wrapper.find( 'ExpenseForm' ).prop( 'onSubmit' )( editedExpense );
-    expect( history.push ).toHaveBeenLastCalledWith( '/' );
-    expect( startEditExpense ).toHaveBeenLastCalledWith( editedExpense.id, editedExpense );
+    const editModalParams = {
+        modalBody: 'Are you sure you wanna delete this expense?',
+        modalConfirmText: 'Of course!',
+        modalCancelText: 'Wait! No!'
+    };
+    expect( wrapper.state( 'isModalOpen' ) ).toBeTruthy();
+    expect( wrapper.state ).toMatch( editModalParams );
 } );
 
-test( 'Should handle remove expense', () => {
-    wrapper.find( 'button' ).prop( 'onClick' )();
-    expect( history.push ).toHaveBeenLastCalledWith( '/' );
-    expect( startRemoveExpense ).toHaveBeenLastCalledWith( { id: editedExpense.id } );
+// test( 'Should handle edit expense', () => {
+//     wrapper.find( 'ExpenseForm' ).prop( 'onSubmit' )( editedExpense );
+//     expect( history.push ).toHaveBeenLastCalledWith( '/' );
+//     expect( startEditExpense ).toHaveBeenLastCalledWith( editedExpense.id, editedExpense );
+// } );
+
+test( 'Should change state with values for a remove confirmation modal when clicking on delete', () => {
+    wrapper.find( 'button' ).simulate( 'click' );
+    expect( wrapper.state( 'isModalOpen' ) ).toBeTruthy();
 } );
+
+// test( 'Should handle remove expense', () => {
+//     wrapper.find( 'button' ).prop( 'onClick' )();
+//     expect( history.push ).toHaveBeenLastCalledWith( '/' );
+//     expect( startRemoveExpense ).toHaveBeenLastCalledWith( { id: editedExpense.id } );
+// } );

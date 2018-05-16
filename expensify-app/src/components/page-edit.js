@@ -26,7 +26,7 @@ export class PageEdit extends React.Component {
 
     openConfirmModal = expense => {
         let modalParams = {};
-        if ( expense.nativeEvent  ) {
+        if ( expense && expense.nativeEvent  ) {
             // Remove
             modalParams = {
                 modalBody: 'Are you sure you wanna delete this expense?',
