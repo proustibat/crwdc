@@ -2,6 +2,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { PageEdit } from "../../components/page-edit";
 import expenses from "../fixtures/expenses";
+import ConfirmModal from "../../components/ConfirmModal";
 
 let startEditExpense, startRemoveExpense, history, wrapper, editedExpense;
 
@@ -22,30 +23,43 @@ test( 'Should render edit expense page correctly', () => {
     expect( wrapper ).toMatchSnapshot();
 } );
 
-test( 'Should change state with values for an edit confirmation modal when clicking on save', () => {
-    wrapper.find( 'ExpenseForm' ).prop( 'onSubmit' )( editedExpense );
+test( 'Should open a modal to confirm when clicking on save then handle edit expense when confirming', () => {
     const editModalParams = {
+        modalBody: 'Do you wanna save your changes?',
+        isModalOpen: true
+    };
+
+    wrapper.find( 'ExpenseForm' ).simulate( 'submit', editedExpense );
+    expect( wrapper.state() ).toMatchObject( editModalParams );
+
+    wrapper.update();
+
+    // ConfirmModal should be open
+    expect( wrapper.find( ConfirmModal ).prop( 'showModal' ) ).toBeTruthy();
+
+    // Call confirm action method (as if user clicks yes)
+    wrapper.find( ConfirmModal ).prop( 'handleConfirm' )();
+    expect( history.push ).toHaveBeenLastCalledWith( '/' );
+    expect( startEditExpense ).toHaveBeenLastCalledWith( editedExpense.id, editedExpense );
+} );
+
+test( 'Should open a modal to confirm when clicking on delete then handle remove expense when confirming', () => {
+    wrapper.find( 'button' ).simulate( 'click', { nativeEvent: true } );
+    const removeModalParams = {
         modalBody: 'Are you sure you wanna delete this expense?',
         modalConfirmText: 'Of course!',
-        modalCancelText: 'Wait! No!'
+        modalCancelText: 'Wait! No!',
+        isModalOpen: true
     };
-    expect( wrapper.state( 'isModalOpen' ) ).toBeTruthy();
-    expect( wrapper.state ).toMatch( editModalParams );
+    expect( wrapper.state() ).toMatchObject( removeModalParams );
+    wrapper.update();
+
+    // ConfirmModal should be open
+    expect( wrapper.find( ConfirmModal ).prop( 'showModal' ) ).toBeTruthy();
+    // Call confirm action method (as if user clicks yes)
+    wrapper.find( ConfirmModal ).prop( 'handleConfirm' )();
+
+    expect( history.push ).toHaveBeenLastCalledWith( '/' );
+    expect( startRemoveExpense ).toHaveBeenLastCalledWith( { id: editedExpense.id } );
 } );
 
-// test( 'Should handle edit expense', () => {
-//     wrapper.find( 'ExpenseForm' ).prop( 'onSubmit' )( editedExpense );
-//     expect( history.push ).toHaveBeenLastCalledWith( '/' );
-//     expect( startEditExpense ).toHaveBeenLastCalledWith( editedExpense.id, editedExpense );
-// } );
-
-test( 'Should change state with values for a remove confirmation modal when clicking on delete', () => {
-    wrapper.find( 'button' ).simulate( 'click' );
-    expect( wrapper.state( 'isModalOpen' ) ).toBeTruthy();
-} );
-
-// test( 'Should handle remove expense', () => {
-//     wrapper.find( 'button' ).prop( 'onClick' )();
-//     expect( history.push ).toHaveBeenLastCalledWith( '/' );
-//     expect( startRemoveExpense ).toHaveBeenLastCalledWith( { id: editedExpense.id } );
-// } );
